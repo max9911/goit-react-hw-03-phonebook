@@ -6,24 +6,22 @@ import Filter from './filter/filter';
 
 class App extends Component {
   state = {
-    contacts: [
-      { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-      { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-      { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-      { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-    ],
+    contacts: null,
     filter: '',
   };
 
   addContact = data => {
     const newContact = { ...data, id: nanoid() };
-    const ifExist = this.state.contacts.find(el => el.name === data.name);
+    const ifExist = this.state.contacts.find(
+      el => el.name.toLowerCase() === data.name.toLowerCase()
+    );
     if (ifExist) {
       return alert(`${data.name} is already in contacts.`);
     } else {
       this.setState(prev => ({
         contacts: [...prev.contacts, newContact],
       }));
+      // localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
     }
   };
 
@@ -38,6 +36,33 @@ class App extends Component {
     }));
   };
 
+  componentDidMount() {
+    const initialData = [
+      { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
+      { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
+      { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
+      { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
+    ];
+    const storageData = localStorage.getItem('contacts');
+
+    if (storageData && JSON.parse(storageData).length > 0) {
+      this.setState({
+        contacts: JSON.parse(storageData),
+      });
+    } else {
+      this.setState({
+        contacts: initialData,
+      });
+      localStorage.setItem('contacts', JSON.stringify(initialData));
+    }
+  }
+
+  componentDidUpdate(prevPr, prevSt) {
+    if (prevSt.contacts !== this.state.contacts) {
+      localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
+    }
+  }
+
   render() {
     return (
       <div>
@@ -46,11 +71,13 @@ class App extends Component {
 
         <h2>Contacts</h2>
         <Filter filter={this.filter} />
-        <ContactList
-          arr={this.state.contacts}
-          filter={this.state.filter}
-          delBtn={this.delBtn}
-        />
+        {this.state.contacts && (
+          <ContactList
+            arr={this.state.contacts}
+            filter={this.state.filter}
+            delBtn={this.delBtn}
+          />
+        )}
       </div>
     );
   }

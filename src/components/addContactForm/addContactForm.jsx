@@ -18,8 +18,6 @@ class AddForm extends Component {
       name: '',
       number: '+380',
     });
-
-    this.setState({});
   };
 
   render() {
